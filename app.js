@@ -16,9 +16,12 @@ const timeText=document.getElementById("timeText");
 const dateText=document.getElementById("dateText");
 const cpu=document.getElementById("cpu");
 const mem=document.getElementById("mem");
+const newsBtn=document.getElementById("newsBtn");
+const newsList=document.getElementById("newsList");
 
 let recognition=null;
 let memos=JSON.parse(localStorage.getItem("jarvis_memos")||"[]");
+let lastNews=[];
 
 function tick(){
   const d=new Date();
@@ -77,13 +80,82 @@ function safeCalc(expression){
     return `${expression.trim()} = ${result.toLocaleString()}`;
   }catch{return null}
 }
-function handleCommand(raw){
+
+function getNewsFeedUrl(kind){
+  if(kind==="electric"){
+    return "https://news.google.com/rss/search?q=%EC%A0%84%EA%B8%B0%EA%B3%B5%EC%82%AC%20OR%20%ED%95%9C%EC%A0%84%20OR%20%ED%83%9C%EC%96%91%EA%B4%91&hl=ko&gl=KR&ceid=KR:ko";
+  }
+  return "https://news.google.com/rss?hl=ko&gl=KR&ceid=KR:ko";
+}
+
+async function loadNews(kind="main"){
+  newsList.textContent="뉴스를 불러오는 중입니다...";
+  footerStatus.textContent="주요 뉴스를 확인하고 있습니다";
+  try{
+    const rss=getNewsFeedUrl(kind);
+    const url="https://api.allorigins.win/raw?url="+encodeURIComponent(rss);
+    const res=await fetch(url);
+    if(!res.ok) throw new Error("news fetch failed");
+    const xml=await res.text();
+    const doc=new DOMParser().parseFromString(xml,"text/xml");
+    const items=[...doc.querySelectorAll("item")].slice(0,5).map(item=>({
+      title:item.querySelector("title")?.textContent?.replace(/ - .+$/,"")||"제목 없음",
+      link:item.querySelector("link")?.textContent||"#",
+      pubDate:item.querySelector("pubDate")?.textContent||""
+    }));
+    lastNews=items;
+    if(!items.length) throw new Error("no news");
+
+    newsList.innerHTML="";
+    items.forEach((n,i)=>{
+      const a=document.createElement("a");
+      a.className="news-item";
+      a.href=n.link;
+      a.target="_blank";
+      a.rel="noopener";
+      a.innerHTML=`${i+1}. ${escapeHtml(n.title)}<small>${formatDate(n.pubDate)}</small>`;
+      newsList.appendChild(a);
+    });
+
+    const summary="주요 뉴스입니다.\n"+items.map((n,i)=>`${i+1}. ${n.title}`).join("\n");
+    addMsg("bot",summary);
+    speak(`주요 뉴스 ${items.length}개를 불러왔습니다.`);
+  }catch(e){
+    const msg="뉴스를 불러오지 못했습니다. 인터넷 연결을 확인하거나 잠시 후 다시 시도해주세요.";
+    newsList.textContent=msg;
+    addMsg("bot",msg);
+    speak("뉴스를 불러오지 못했습니다.");
+  }
+}
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
+}
+function formatDate(d){
+  if(!d) return "";
+  const date=new Date(d);
+  if(isNaN(date.getTime())) return "";
+  return date.toLocaleString("ko-KR",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"});
+}
+
+async function handleCommand(raw){
   const original=raw.trim();
   const body=original.replace(/^자비스[, ]*/i,"").trim();
   addMsg("user",original);
   let response="";
   if(!body){
     response="네, 말씀해주세요.";
+  }else if(body.includes("뉴스")){
+    if(body.includes("전기")||body.includes("한전")||body.includes("태양광")) {
+      addMsg("bot","전기공사 관련 뉴스를 확인하겠습니다.");
+      speak("전기공사 관련 뉴스를 확인하겠습니다.");
+      await loadNews("electric");
+      return;
+    } else {
+      addMsg("bot","주요 뉴스를 확인하겠습니다.");
+      speak("주요 뉴스를 확인하겠습니다.");
+      await loadNews("main");
+      return;
+    }
   }else if(body.includes("메모 보여")||body.includes("메모 목록")){
     response=memos.length?"저장된 메모입니다.\n"+memos.map((m,i)=>`${i+1}. ${m}`).join("\n"):"저장된 메모가 없습니다.";
   }else if(body.includes("메모")){
@@ -96,9 +168,9 @@ function handleCommand(raw){
   }else if(body.includes("안녕")){
     response="안녕하세요. 자비스 시스템 온라인입니다.";
   }else if(body.includes("도움")||body.includes("뭐 할 수")){
-    response="현재 가능한 기능입니다.\n\n1. 메모 저장\n2. 메모 목록 확인\n3. 간단 계산\n4. 음성 답변\n5. 노트북/핸드폰 반응형 화면";
+    response="현재 가능한 기능입니다.\n\n1. 주요 뉴스 확인\n2. 전기공사 관련 뉴스 확인\n3. 메모 저장\n4. 메모 목록 확인\n5. 간단 계산\n6. 음성 답변";
   }else{
-    response="아직 연결되지 않은 명령입니다.\n\n가능한 명령:\n- 자비스, 메모 내용\n- 자비스, 메모 보여줘\n- 자비스, 1502 나누기 30 계산해줘";
+    response="아직 연결되지 않은 명령입니다.\n\n가능한 명령:\n- 자비스, 주요 뉴스 알려줘\n- 자비스, 전기 뉴스 알려줘\n- 자비스, 메모 내용\n- 자비스, 1502 나누기 30 계산해줘";
   }
   addMsg("bot",response);
   speak(response.split("\n")[0]);
@@ -125,6 +197,7 @@ sendBtn.addEventListener("click",()=>{const v=textInput.value.trim();if(!v)retur
 textInput.addEventListener("keydown",e=>{if(e.key==="Enter")sendBtn.click();});
 calcBtn.addEventListener("click",()=>{const r=safeCalc(calcInput.value);calcResult.textContent=r||"계산식을 다시 입력해주세요.";});
 deleteMemoBtn.addEventListener("click",()=>{memos=[];localStorage.removeItem("jarvis_memos");renderMemos();addMsg("bot","메모를 모두 삭제했습니다.");});
+newsBtn.addEventListener("click",()=>loadNews("main"));
 document.querySelectorAll(".chip").forEach(btn=>btn.addEventListener("click",()=>handleCommand(btn.textContent)));
 renderMemos();
-addMsg("bot","JARVIS HUD 웹앱이 준비됐습니다. 중앙 코어를 누르거나 명령어를 입력하세요.");
+addMsg("bot","JARVIS 뉴스 웹앱이 준비됐습니다. “자비스, 주요 뉴스 알려줘”라고 말해보세요.");

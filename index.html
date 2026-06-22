@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#020914">
-  <title>JARVIS HUD</title>
+  <title>JARVIS HUD NEWS</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -35,6 +35,7 @@
       <aside class="side left">
         <button class="nav active">⌂ 대시보드</button>
         <button class="nav">✦ AI 대화</button>
+        <button class="nav">◈ 주요 뉴스</button>
         <button class="nav">▣ 메모</button>
         <button class="nav">∑ 계산</button>
         <button class="nav">☷ 작업기록</button>
@@ -67,15 +68,15 @@
 
         <div class="command-bar">
           <span class="mic-icon">🎙️</span>
-          <input id="textInput" placeholder="자비스, 메모 태양광 견적 확인">
+          <input id="textInput" placeholder="자비스, 주요 뉴스 알려줘">
           <button id="sendBtn">EXECUTE</button>
         </div>
 
         <div class="quick">
-          <button class="chip">자비스, 메모 태양광 철거 견적 확인</button>
+          <button class="chip">자비스, 주요 뉴스 알려줘</button>
+          <button class="chip">자비스, 전기 뉴스 알려줘</button>
           <button class="chip">자비스, 메모 보여줘</button>
           <button class="chip">자비스, 1502 나누기 30 계산해줘</button>
-          <button class="chip">자비스, 안녕</button>
         </div>
 
         <div class="console">
@@ -95,6 +96,12 @@
             <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
           </div>
           <button id="stopBtn" class="full">STOP</button>
+        </div>
+
+        <div class="module news-module">
+          <h3>MAJOR NEWS</h3>
+          <button id="newsBtn" class="full">LOAD NEWS</button>
+          <div id="newsList" class="news-list">“자비스, 주요 뉴스 알려줘”라고 말해보세요.</div>
         </div>
 
         <div class="module">
