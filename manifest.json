@@ -1,9 +1,9 @@
 {
-  "name":"Jarvis WebApp",
-  "short_name":"Jarvis",
+  "name":"JARVIS HUD",
+  "short_name":"JARVIS",
   "start_url":"./index.html",
   "display":"standalone",
-  "background_color":"#06101d",
-  "theme_color":"#06101d",
+  "background_color":"#020914",
+  "theme_color":"#020914",
   "icons":[]
 }

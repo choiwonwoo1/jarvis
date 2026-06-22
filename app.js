@@ -4,17 +4,30 @@ const stopBtn=document.getElementById("stopBtn");
 const clearBtn=document.getElementById("clearBtn");
 const sendBtn=document.getElementById("sendBtn");
 const textInput=document.getElementById("textInput");
-const statusDot=document.getElementById("statusDot");
-const statusText=document.getElementById("statusText");
 const memoList=document.getElementById("memoList");
-const orb=document.getElementById("orb");
 const calcInput=document.getElementById("calcInput");
 const calcBtn=document.getElementById("calcBtn");
 const calcResult=document.getElementById("calcResult");
 const deleteMemoBtn=document.getElementById("deleteMemoBtn");
+const voiceStatus=document.getElementById("voiceStatus");
+const footerStatus=document.getElementById("footerStatus");
+const wave=document.querySelector(".wave");
+const timeText=document.getElementById("timeText");
+const dateText=document.getElementById("dateText");
+const cpu=document.getElementById("cpu");
+const mem=document.getElementById("mem");
 
 let recognition=null;
 let memos=JSON.parse(localStorage.getItem("jarvis_memos")||"[]");
+
+function tick(){
+  const d=new Date();
+  timeText.textContent=d.toLocaleTimeString("ko-KR",{hour12:false});
+  dateText.textContent=d.toLocaleDateString("ko-KR",{year:"numeric",month:"2-digit",day:"2-digit",weekday:"short"});
+  cpu.textContent=(14+Math.floor(Math.random()*12))+"%";
+  mem.textContent=(29+Math.floor(Math.random()*10))+"%";
+}
+setInterval(tick,1000); tick();
 
 function addMsg(role,text){
   const div=document.createElement("div");
@@ -31,10 +44,11 @@ function speak(text){
   u.rate=1.02;
   speechSynthesis.speak(u);
 }
-function setStatus(active,text){
-  statusDot.classList.toggle("on",active);
-  orb.classList.toggle("listening",active);
-  statusText.textContent=text;
+function setListening(on){
+  listenBtn.classList.toggle("listening",on);
+  wave.classList.toggle("listening-wave",on);
+  voiceStatus.textContent=on?"LISTENING":"STANDBY";
+  footerStatus.textContent=on?"음성 명령을 듣고 있습니다":"명령을 기다리고 있습니다";
 }
 function renderMemos(){
   memoList.innerHTML="";
@@ -61,7 +75,7 @@ function safeCalc(expression){
     const result=Function(`"use strict"; return (${cleaned})`)();
     if(!Number.isFinite(result)) return null;
     return `${expression.trim()} = ${result.toLocaleString()}`;
-  }catch{return null;}
+  }catch{return null}
 }
 function handleCommand(raw){
   const original=raw.trim();
@@ -71,7 +85,7 @@ function handleCommand(raw){
   if(!body){
     response="네, 말씀해주세요.";
   }else if(body.includes("메모 보여")||body.includes("메모 목록")){
-    response=memos.length ? "저장된 메모입니다.\n"+memos.map((m,i)=>`${i+1}. ${m}`).join("\n") : "저장된 메모가 없습니다.";
+    response=memos.length?"저장된 메모입니다.\n"+memos.map((m,i)=>`${i+1}. ${m}`).join("\n"):"저장된 메모가 없습니다.";
   }else if(body.includes("메모")){
     const memo=body.replace("메모","").replace("해줘","").trim();
     if(memo){saveMemo(memo);response=`메모했습니다. ${memo}`;}
@@ -80,9 +94,9 @@ function handleCommand(raw){
     const result=safeCalc(body.replace("계산해줘","").replace("계산",""));
     response=result||"계산식을 숫자와 더하기, 빼기, 곱하기, 나누기로 말해주세요.";
   }else if(body.includes("안녕")){
-    response="안녕하세요. Jarvis 준비됐습니다.";
+    response="안녕하세요. 자비스 시스템 온라인입니다.";
   }else if(body.includes("도움")||body.includes("뭐 할 수")){
-    response="현재 가능한 기능입니다.\n\n1. 메모 저장\n2. 메모 목록 확인\n3. 간단 계산\n4. 음성 답변\n\n노트북과 핸드폰 모두 같은 주소로 접속해서 사용할 수 있습니다.";
+    response="현재 가능한 기능입니다.\n\n1. 메모 저장\n2. 메모 목록 확인\n3. 간단 계산\n4. 음성 답변\n5. 노트북/핸드폰 반응형 화면";
   }else{
     response="아직 연결되지 않은 명령입니다.\n\n가능한 명령:\n- 자비스, 메모 내용\n- 자비스, 메모 보여줘\n- 자비스, 1502 나누기 30 계산해줘";
   }
@@ -92,20 +106,20 @@ function handleCommand(raw){
 function setupSpeech(){
   const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SpeechRecognition){
-    addMsg("bot","이 브라우저는 음성 인식을 지원하지 않습니다. Android Chrome 또는 PC Chrome에서 열어보세요.");
+    addMsg("bot","이 브라우저는 음성 인식을 지원하지 않습니다. PC Chrome 또는 Android Chrome에서 열어보세요.");
     return;
   }
   recognition=new SpeechRecognition();
   recognition.lang="ko-KR";
   recognition.continuous=false;
   recognition.interimResults=false;
-  recognition.onstart=()=>setStatus(true,"듣는 중");
-  recognition.onend=()=>setStatus(false,"대기 중");
-  recognition.onerror=()=>setStatus(false,"오류");
+  recognition.onstart=()=>setListening(true);
+  recognition.onend=()=>setListening(false);
+  recognition.onerror=()=>setListening(false);
   recognition.onresult=e=>handleCommand(e.results[0][0].transcript);
 }
 listenBtn.addEventListener("click",()=>{if(!recognition)setupSpeech();if(recognition)recognition.start();});
-stopBtn.addEventListener("click",()=>{if(recognition)recognition.stop();if("speechSynthesis" in window)speechSynthesis.cancel();setStatus(false,"대기 중");});
+stopBtn.addEventListener("click",()=>{if(recognition)recognition.stop();if("speechSynthesis" in window)speechSynthesis.cancel();setListening(false);});
 clearBtn.addEventListener("click",()=>chat.innerHTML="");
 sendBtn.addEventListener("click",()=>{const v=textInput.value.trim();if(!v)return;handleCommand(v);textInput.value="";});
 textInput.addEventListener("keydown",e=>{if(e.key==="Enter")sendBtn.click();});
@@ -113,4 +127,4 @@ calcBtn.addEventListener("click",()=>{const r=safeCalc(calcInput.value);calcResu
 deleteMemoBtn.addEventListener("click",()=>{memos=[];localStorage.removeItem("jarvis_memos");renderMemos();addMsg("bot","메모를 모두 삭제했습니다.");});
 document.querySelectorAll(".chip").forEach(btn=>btn.addEventListener("click",()=>handleCommand(btn.textContent)));
 renderMemos();
-addMsg("bot","Jarvis 웹앱이 준비됐습니다. 노트북과 핸드폰에서 같은 주소로 사용할 수 있습니다.");
+addMsg("bot","JARVIS HUD 웹앱이 준비됐습니다. 중앙 코어를 누르거나 명령어를 입력하세요.");

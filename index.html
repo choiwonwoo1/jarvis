@@ -3,68 +3,121 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#06101d">
-  <title>Jarvis WebApp</title>
+  <meta name="theme-color" content="#020914">
+  <title>JARVIS HUD</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<main class="app">
-  <section class="top">
-    <div>
-      <p class="eyebrow">Notebook · Phone WebApp</p>
-      <h1>Jarvis</h1>
-      <p class="sub">노트북과 핸드폰에서 같이 쓰는 개인 비서 웹앱</p>
-    </div>
-    <div class="status"><span id="statusDot"></span><strong id="statusText">대기 중</strong></div>
-  </section>
+  <div class="scanline"></div>
+  <div class="bg-grid"></div>
 
-  <section class="hero">
-    <div class="orb" id="orb"><span></span></div>
-    <p class="hint">핸드폰은 Chrome에서 접속 후 “홈 화면에 추가”하면 앱처럼 사용할 수 있습니다.</p>
-    <button id="listenBtn" class="primary big">🎙️ 자비스 부르기</button>
-    <div class="row">
-      <button id="stopBtn">중지</button>
-      <button id="clearBtn">대화 지우기</button>
-    </div>
-  </section>
-
-  <section class="inputBox">
-    <input id="textInput" placeholder="예: 자비스, 메모 태양광 견적 확인">
-    <button id="sendBtn" class="primary">보내기</button>
-  </section>
-
-  <section class="grid">
-    <article class="panel chatPanel">
-      <h2>대화</h2>
-      <div id="chat" class="chat"></div>
-    </article>
-
-    <article class="panel">
-      <h2>메모</h2>
-      <ul id="memoList"></ul>
-      <button id="deleteMemoBtn">메모 전체 삭제</button>
-    </article>
-
-    <article class="panel">
-      <h2>빠른 계산</h2>
-      <p class="small">예: 1502 나누기 30, 12*8+5</p>
-      <input id="calcInput" placeholder="계산식 입력">
-      <button id="calcBtn" class="primary">계산</button>
-      <div id="calcResult" class="result"></div>
-    </article>
-
-    <article class="panel">
-      <h2>예시 명령</h2>
-      <div class="chips">
-        <button class="chip">자비스, 메모 태양광 철거 견적 확인</button>
-        <button class="chip">자비스, 메모 보여줘</button>
-        <button class="chip">자비스, 1502 나누기 30 계산해줘</button>
-        <button class="chip">자비스, 안녕</button>
+  <main class="hud">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-main">JARVIS</div>
+        <div class="brand-sub">AI ASSISTANT SYSTEM</div>
       </div>
-    </article>
-  </section>
-</main>
-<script src="app.js"></script>
+
+      <div class="clockbox">
+        <div id="timeText">00:00:00</div>
+        <div id="dateText">SYSTEM READY</div>
+      </div>
+
+      <div class="top-status">
+        <span class="dot"></span>
+        <span>ONLINE</span>
+        <span class="battery">100%</span>
+      </div>
+    </header>
+
+    <section class="layout">
+      <aside class="side left">
+        <button class="nav active">⌂ 대시보드</button>
+        <button class="nav">✦ AI 대화</button>
+        <button class="nav">▣ 메모</button>
+        <button class="nav">∑ 계산</button>
+        <button class="nav">☷ 작업기록</button>
+        <button class="nav">⚙ 설정</button>
+
+        <div class="module">
+          <h3>SYSTEM STATUS</h3>
+          <div class="ring small-ring">100<span>%</span></div>
+          <div class="stat"><b>CPU</b><span id="cpu">18%</span></div>
+          <div class="stat"><b>MEMORY</b><span id="mem">32%</span></div>
+          <div class="stat"><b>NETWORK</b><span>ONLINE</span></div>
+        </div>
+      </aside>
+
+      <section class="center">
+        <div class="greeting">
+          <span>안녕하세요, 원우님</span>
+          <strong>무엇을 도와드릴까요?</strong>
+        </div>
+
+        <div class="core-wrap">
+          <div class="core-ring ring1"></div>
+          <div class="core-ring ring2"></div>
+          <div class="core-ring ring3"></div>
+          <button id="listenBtn" class="core">
+            <span class="core-title">JARVIS</span>
+            <span class="core-sub">TAP TO SPEAK</span>
+          </button>
+        </div>
+
+        <div class="command-bar">
+          <span class="mic-icon">🎙️</span>
+          <input id="textInput" placeholder="자비스, 메모 태양광 견적 확인">
+          <button id="sendBtn">EXECUTE</button>
+        </div>
+
+        <div class="quick">
+          <button class="chip">자비스, 메모 태양광 철거 견적 확인</button>
+          <button class="chip">자비스, 메모 보여줘</button>
+          <button class="chip">자비스, 1502 나누기 30 계산해줘</button>
+          <button class="chip">자비스, 안녕</button>
+        </div>
+
+        <div class="console">
+          <div class="console-head">
+            <span>AI CONSOLE</span>
+            <button id="clearBtn">CLEAR</button>
+          </div>
+          <div id="chat" class="chat"></div>
+        </div>
+      </section>
+
+      <aside class="side right">
+        <div class="module">
+          <h3>VOICE STATUS</h3>
+          <div id="voiceStatus" class="voice">STANDBY</div>
+          <div class="wave">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <button id="stopBtn" class="full">STOP</button>
+        </div>
+
+        <div class="module">
+          <h3>MEMO</h3>
+          <ul id="memoList"></ul>
+          <button id="deleteMemoBtn" class="full">DELETE MEMO</button>
+        </div>
+
+        <div class="module">
+          <h3>CALCULATOR</h3>
+          <input id="calcInput" placeholder="예: 12*8+5">
+          <button id="calcBtn" class="full">CALCULATE</button>
+          <div id="calcResult" class="result"></div>
+        </div>
+      </aside>
+    </section>
+
+    <footer class="footer">
+      <div>WAKE WORD: “자비스”</div>
+      <div id="footerStatus">명령을 기다리고 있습니다</div>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
 </body>
 </html>
