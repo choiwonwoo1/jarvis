@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#07111f" />
+  <title>모바일 Jarvis</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <section class="top">
+      <div>
+        <p class="eyebrow">Mobile AI Assistant</p>
+        <h1>Jarvis</h1>
+      </div>
+      <div class="status">
+        <span id="statusDot"></span>
+        <strong id="statusText">대기 중</strong>
+      </div>
+    </section>
+
+    <section class="jarvis-card">
+      <div class="orb" id="orb">
+        <span></span>
+      </div>
+      <p class="hint">버튼을 누르고 말하거나 아래에 입력하세요.</p>
+
+      <button id="listenBtn" class="mic">🎙️ 자비스 부르기</button>
+
+      <div class="mini-buttons">
+        <button id="stopBtn">중지</button>
+        <button id="clearBtn">대화 지우기</button>
+      </div>
+    </section>
+
+    <section class="input-card">
+      <input id="textInput" placeholder="예: 자비스, 메모 태양광 견적 확인" />
+      <button id="sendBtn">보내기</button>
+    </section>
+
+    <section class="panel">
+      <h2>대화</h2>
+      <div id="chat" class="chat"></div>
+    </section>
+
+    <section class="panel">
+      <h2>메모</h2>
+      <ul id="memoList"></ul>
+    </section>
+
+    <section class="examples">
+      <h2>예시 명령</h2>
+      <button class="chip">자비스, 메모 태양광 철거 견적 확인</button>
+      <button class="chip">자비스, 1502 나누기 30 계산해줘</button>
+      <button class="chip">자비스, 오늘 할 일 메모</button>
+      <button class="chip">자비스, 안녕</button>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

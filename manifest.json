@@ -1,0 +1,9 @@
+{
+  "name": "모바일 Jarvis",
+  "short_name": "Jarvis",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#06101d",
+  "theme_color": "#07111f",
+  "icons": []
+}
